@@ -8,7 +8,7 @@ $( document ).ready(function() {
     var input_japanese = $('#input_japanese');
     var display = $('div#display');
 
-    var hnum = Number($("#heisig_index").val());
+
 
     // Globals
     known_kanji = [];
@@ -17,7 +17,7 @@ $( document ).ready(function() {
     known_location = [];
 
     /* When textarea is updated... */
-    input_japanese.bind("input propertychange", function() {
+    var update = function () {
 
         known_kanji = [];
         known_kw = [];
@@ -25,7 +25,10 @@ $( document ).ready(function() {
         known_location = [];
 
         var japanese = $('#input_japanese').val();
-        var table_html = "<table>";
+        var hnum = Number($("#heisig_index").val());
+        var table_html = $("<table/>", {id: "test_table"});
+        $("#test_inputs").html('');
+        $("#test_inputs").append(table_html);
 
         var j_cnt, total_known=0;
         for (j_cnt=0; j_cnt<hnum; j_cnt++) {
@@ -36,21 +39,21 @@ $( document ).ready(function() {
                 known_kw.push(kw[j_cnt]);
                 known_location.push(idx);
 
-                table_html += '<tr><td>' + kanji[j_cnt] + ', #'
-                    + (j_cnt+1) + '</td><td><input type="text" \
-                size="15" class="answer" value="'
-                    + kw[j_cnt] + '"></td></tr>';
+                $('<tr/>', {
+                    html: $('<td/>', {
+                        text: kanji[j_cnt] + ", #" + j_cnt+1
+                    }).add($("<td/>", {
+                        text: kw[j_cnt]
+                    }))}).appendTo(table_html);
                 total_known++;
             };
         }
 
-        table_html+="</table>";
-
         //debugger
         $('#number_known').text(total_known);
-        $("#test_inputs").html(table_html);
         display.text("Text again: " + japanese);
-
-    });
-
+    };
+    // Tie above update function to text area & heisig number inputs
+    input_japanese.bind("input propertychange", update);
+    $('#heisig_index').bind("input propertychange", update);
 });
