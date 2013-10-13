@@ -10,19 +10,13 @@ $( document ).ready(function() {
 
 
 
-    // Globals
-    known_kanji = [];
-    known_kw = [];
-    known_hnum = [];
-    known_location = [];
-
     /* When textarea is updated... */
     var update = function () {
 
-        known_kanji = [];
-        known_kw = [];
-        known_hnum = [];
-        known_location = [];
+        var known_kanji = [];
+        var known_kw = [];
+        var known_hnum = [];
+        var known_location = [];
 
         var japanese = $('#input_japanese').val();
         var hnum = Number($("#heisig_index").val());
@@ -52,13 +46,25 @@ $( document ).ready(function() {
 
         // This function will get invoked when inputs table is touched
         var retfun = function() {
+            var kwleft = total_known;
+            var kwlist = $('input.qkw_in');
             var kanji_answers=[];
             // Also possible: `push(val.value)` and
             // `push($(val).attr("value"))`
             $('input.qkanji_in').each(function(i, val) {
-                if (known_kanji.indexOf(this.value)>=0) {
+                var knownidx = known_kanji.indexOf(this.value);
+                if (knownidx>=0) {
                     kanji_answers.push(this.value);
                     $(this).css("color", "green");
+
+                    // Check keyword
+                    if (0 == kwlist[i].value.localeCompare(known_kw[knownidx])) {
+                        $(kwlist[i]).css("color", "green");
+                        kwleft--;
+                    }
+                    else {
+                        $(kwlist[i]).css("color", "red");
+                    }
                 }
                 else {
                     $(this).css("color", "red");
@@ -66,7 +72,8 @@ $( document ).ready(function() {
             });
 
             var nkanji_right = $.unique(kanji_answers).length;
-            $('#number_left').text(total_known - nkanji_right);
+            $('#kanji_number_left').text(total_known - nkanji_right);
+            $('#kw_number_left').text(kwleft);
         };
 
 
@@ -84,8 +91,8 @@ $( document ).ready(function() {
                             html: $("<input/>",
                                     {type:"text", size: 4,
                                      'class':'qkw_in',
-                                     value: known_kw[j_cnt]
-                                    })}))
+                                     value: ""//known_kw[j_cnt]
+                                    }).bind("input propertychange", retfun)}))
             }).appendTo(input_table);
 
         }
@@ -93,7 +100,8 @@ $( document ).ready(function() {
         //debugger
         display.text("Text again: " + japanese);
         $('#number_known').text(total_known);
-        $('#number_left').text(total_known);
+        $('#kanji_number_left').text(total_known);
+        $('#kw_number_left').text(total_known);
 
         $("#answers").html('');
         $("#questions").html('');

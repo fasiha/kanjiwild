@@ -12,9 +12,11 @@
 
     <div id="input_area">
       <p>
-        <textarea type="text" rows="4" cols="50" id="input_japanese">Insert some 日本語 here and we can get started.</textarea>
-      <p>
         Up to what kanji number are you at in Heisig? <input type="text" size="4" id="heisig_index" value="556">
+      </p>
+      <p>
+        <textarea type="text" rows="4" cols="50" id="input_japanese">Insert some 日本語 here and we can get started.</textarea>
+      </p>
     </div>
 
 
@@ -30,11 +32,22 @@
         You know <span id="number_known">0</span> kanji. Enter them here, along with keywords:
       </p>
 
-      <p>Questions: you still need to find <span id="number_left">0</span> kanji!</p>
+      <p>
+        You need to enter <span id="kanji_number_left">0</span> kanji and <span id="kw_number_left">0</span> English keywords below:
+      </p>
       <div id="questions">
       </div>
+      <p>Notes.
+        <ul>
+          <li>
+            Note that right now, this is more intended to be a kanji-centric application, so the keywords are only checked if a correct kanji is entered. Later on, we'll add functionality for keywords by themselves to be checked if you want to work on those, rather than kanji.
+          <li>
+            There ought to be a button here to clear duplicates for you.
+          <li>If you update the main text at the top, kanji and keywords that are still applicable ought to be retained.
+        </ul>
+      </p>
 
-      <p>Answers</p>
+      <p>Answer key: (this will usually be hidden)</p>
       <div id="answers">
       </div>
     </div>
