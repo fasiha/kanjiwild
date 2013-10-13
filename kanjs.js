@@ -50,42 +50,58 @@ $( document ).ready(function() {
             };
         }
 
+        // This function will get invoked when inputs table is touched
+        var retfun = function() {
+            var kanji_answers=[];
+            // Also possible: `push(val.value)` and
+            // `push($(val).attr("value"))`
+            $('input.qkanji_in').each(function(i, val) {
+                if (known_kanji.indexOf(this.value)>=0) {
+                    kanji_answers.push(this.value);
+                    $(this).css("color", "green");
+                }
+                else {
+                    $(this).css("color", "red");
+                }
+            });
+
+            var nkanji_right = $.unique(kanji_answers).length;
+            $('#number_left').text(total_known - nkanji_right);
+        };
+
+
         for (j_cnt=0; j_cnt < total_known; j_cnt++) {
-            // This is the generator
-            // See http://blog.jbrantly.com/2010/04/creating-javascript-function-inside.html
-            var target_fn = (function(kanji) {
-                return function () {
-                    //alert("I need you to type : "+kanji);
-                    if (0==kanji.localeCompare(this.value)) {
-                        alert("Yes!");}
-                };
-            })(kanji[j_cnt]);
-
-            var kanjicell = $('<td/>');
-            var kwcell = $('<td/>');
-
             $('<tr/>', {
-                html: $('<td/>', {
-                    html: $("<input/>",
-                            {type:"text", size: 4,
-                             value: kanji[j_cnt]
-                            }).bind("input propertychange",
-                                    target_fn)
-                }).add($("<td/>", {
-                    html: $("<input/>", {type:"text", size: 4,
-                                         value: kw[j_cnt]
-                                        })
-                }))}).appendTo(input_table);
+                html:
+                $('<td/>', {"class": "question_kanji",
+                            html: $("<input/>", {
+                                type:"text", size: 4,
+                                'class':'qkanji_in',
+                                value: ""//known_kanji[j_cnt]
+                            }).bind("input propertychange", retfun)
+                           }).add(
+                $("<td/>", {"class":"question_kw",
+                            html: $("<input/>",
+                                    {type:"text", size: 4,
+                                     'class':'qkw_in',
+                                     value: known_kw[j_cnt]
+                                    })}))
+            }).appendTo(input_table);
 
         }
 
         //debugger
-        $('#number_known').text(total_known);
-        $("#answers").html('');
-        $("#answers").append(input_table);
-        $("#answers").append(answer_table);
         display.text("Text again: " + japanese);
+        $('#number_known').text(total_known);
+        $('#number_left').text(total_known);
+
+        $("#answers").html('');
+        $("#questions").html('');
+
+        $("#questions").append(input_table);
+        $("#answers").append(answer_table);
     };
+
     // Tie above update function to text area & heisig number inputs
     input_japanese.bind("input propertychange", update);
     $('#heisig_index').bind("input propertychange", update);
