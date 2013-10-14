@@ -22,20 +22,35 @@
 
 
     <div id="display">
-      Same text as above displayed here, except bigger, and with line-breaks replaced by proper HTML breaks.
+      Same text as above displayed here, except bigger (and eventually with line-breaks replaced by proper HTML breaks).
     </div>
-
 
 
     <div id="test">
       <p>
-        You know <span id="number_known">0</span> kanji. Enter them here, along with keywords:
+        You know <span id="number_known">0</span> kanji!
       </p>
 
       <p>
         You need to enter <span id="kanji_number_left">0</span> kanji and <span id="kw_number_left">0</span> English keywords below:
       </p>
       <div id="questions">
+        <table id="input_table" border="0">
+          <tbody>
+            <tr>
+              <td class="question_kanji"><input type="text" class="qkanji_in" value="" style="color: green;"></td>
+              <td class="question_kw"><input type="text" class="qkw_in" value="" style="color: green;"></td>
+            </tr>
+            <tr>
+              <td class="question_kanji"><input type="text" class="qkanji_in" value="" style="color: green;"></td>
+              <td class="question_kw"><input type="text" class="qkw_in" value="" style="color: green;"></td>
+            </tr>
+            <tr>
+              <td class="question_kanji"><input type="text" class="qkanji_in" value="" style="color: green;"></td>
+              <td class="question_kw"><input type="text" class="qkw_in" value="" style="color: green;"></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
       <p>Notes.
         <ul>
@@ -49,6 +64,22 @@
 
       <p>Answer key: (this will usually be hidden)</p>
       <div id="answers">
+        <table id="answer_table" border="0">
+          <tbody>
+            <tr>
+              <td>日, #12</td>
+              <td>day</td>
+            </tr>
+            <tr>
+              <td>本, #224</td>
+              <td>book</td>
+            </tr>
+            <tr>
+              <td>語, #371</td>
+              <td>word</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
