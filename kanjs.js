@@ -1,8 +1,12 @@
 $( document ).ready(function() {
 
-    /* Make *sure* you load `data.js` first, in the HTML file! */
-    //kanji = kanji.split('');
+    // Make *sure* you load `data.js` first, in the HTML file! That
+    //JavaScript file will load keywords as a single huge
+    //comma-separated string, so split it at commas. The kanji is also
+    //a single 2200-long string of kanji, but don't split that into an
+    //array, leave it as a string.
     kw = kw.split(',');
+    // Leave the 2200 kanji as a string // kanji = kanji.split('');
 
     /* Store tags as their own variables */
     var input_japanese = $('#input_japanese');
@@ -140,6 +144,23 @@ $( document ).ready(function() {
         $("#answers").append(answer_table);
     };
 
+    // Bind the above callback to both the practice input and the
+    // Heisig number input
     input_japanese.bind("input propertychange", update_input_text);
     $('#heisig_index').bind("input propertychange", update_input_text);
+
+    // A minor issue: make the answer key hidden by default and enable
+    // you to toggle it.
+    var toggle_answer_key = function(obj) {
+        var ans = $('div#answers');
+        var currently = ans.css("visibility");
+        if (0 == currently.localeCompare("visible")) {
+            ans.css("visibility", "hidden");
+        }
+        else {
+            ans.css("visibility", "visible");
+        }
+    };
+    $('div#answers').css("visibility", "hidden");
+    $('span#toggle_answer_button').click(toggle_answer_key);
 });
