@@ -163,4 +163,14 @@ $( document ).ready(function() {
     };
     $('div#answers').css("visibility", "hidden");
     $('span#toggle_answer_button').click(toggle_answer_key);
+
+    // Finally, create a little fun-function to test kanji in the Javascript
+    // console!
+    function getrand(items) {
+        return items[Math.floor(Math.random() * items.length)];
+    }
+    function randkw(n) {return getrand(kw.slice(0, n));}
+    function randkanji(n) {return getrand(kanji.slice(0, n));}
+    // To play, call randkw(743) (replacing 743 with whatever Heisig number
+    // you're on) to get a random keyword.
 });
