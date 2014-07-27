@@ -3,15 +3,17 @@ $( document ).ready(function() {
     // Make *sure* you load `data.js` first, in the HTML file! That
     //JavaScript file will load keywords as a single huge
     //comma-separated string, so split it at commas. The kanji is also
-    //a single 2200-long string of kanji, but don't split that into an
+    //a single 3029-long string of kanji, but don't split that into an
     //array, leave it as a string.
     kw = kw.split(',');
-    // Leave the 2200 kanji as a string // kanji = kanji.split('');
+    // Leave the kanji as a string // kanji = kanji.split('');
 
     /* Store tags as their own variables */
     var input_japanese = $('#input_japanese');
     var display = $('div#display');
 
+    /* Hide the test, render it visible as soon as test text is entered */
+    $("#test").css("visibility", "hidden");
 
     /* There are two major functions here. `update_input_text` reads
      the Japanese input as well as the Heisig number entered, finds the
@@ -31,6 +33,9 @@ $( document ).ready(function() {
 
     /* When textarea is updated... */
     var update_input_text = function () {
+        // Enable visibility of the test section
+        $("#test").css("visibility", "visible");
+
         // These arrays store the relevant input kanji and related data
         var known_kanji = [];
         var known_kw = [];
