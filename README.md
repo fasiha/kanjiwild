@@ -6,7 +6,7 @@ What is this for?
 
 This browser-based application asks you how far along you are in James Heisig’s *Remembering the Kanji, vol. 1* (6th edition) and, after entering in some text, will tell you how many Japanese kanji you should recognize and allows you to enter them along with the English keyword assigned to each by Heisig.
 
-Test it out at [http://www.aldebrn.me/kanjiwild/](http://www.aldebrn.me/kanjiwild/).
+Test it out at [http://fasiha.github.io/kanjiwild/](http://fasiha.github.io/kanjiwild/).
 
 In practical terms?
 -------------------
