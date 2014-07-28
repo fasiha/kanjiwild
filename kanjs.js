@@ -74,6 +74,10 @@ $( document ).ready(function() {
             };
         }
 
+        // Showing all kanji or keywords?
+        var show_kanji = $('#show-all-kanji')[0].checked;
+        var show_kw = $('#show-all-kw')[0].checked;
+
         // This function is the second major function here. This will
         // get invoked when "questions" section of the application is
         // changed. It will build a list of kanji you've input, and if
@@ -124,20 +128,20 @@ $( document ).ready(function() {
                             html: $("<input/>", {
                                 type:"text", size: 4,
                                 'class':'qkanji_in',
-                                value: ""//known_kanji[j_cnt]
+                                value: show_kanji ? known_kanji[j_cnt] : ""
                             }).bind("input propertychange", check_answers)
                            }).add(
                 $("<td/>", {"class":"question_kw",
                             html: $("<input/>",
                                     {type:"text", size: 4,
                                      'class':'qkw_in',
-                                     value: ""//known_kw[j_cnt]
+                                     value: show_kw ? known_kw[j_cnt] : ""
                                     }).bind("input propertychange", check_answers)}))
             }).appendTo(input_table);
         }
 
         // Final tweaks of the HTML itself with some values, now known
-        display.text("Text again: " + japanese);
+        display.text(japanese).css("font-weight", "bold");
         $('#number_known').text(total_known);
         $('#kanji_number_left').text(total_known);
         $('#kw_number_left').text(total_known);
@@ -153,6 +157,8 @@ $( document ).ready(function() {
     // Heisig number input
     input_japanese.bind("input propertychange", update_input_text);
     $('#heisig_index').bind("input propertychange", update_input_text);
+    $('#show-all-kanji').change(update_input_text);
+    $('#show-all-kw').change(update_input_text);
 
     // A minor issue: make the answer key hidden by default and enable
     // you to toggle it.
