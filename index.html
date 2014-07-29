@@ -2,6 +2,9 @@
 <html>
   <head>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src="xregexp-all-min.js" charset="utf-8"></script>
+    
     <script type="text/javascript" src="data.js"></script>
     <script type="text/javascript" src="kanjs.js"></script>
     <link rel="stylesheet" type="text/css" href="kanjs.css">
@@ -15,7 +18,7 @@
         What kanji number are you at in Heisig's <i>Remembering the Kanji</i>, volumes 1 (6th edition) and 3? <input type="text" size="4" id="heisig_index" value="2200">
       </p>
       <p>
-        <textarea type="text" rows="4" cols="50" id="input_japanese">Insert some 日本語 here and we can get started.</textarea>
+        <textarea type="text" rows="4" cols="50" id="input_japanese">Insert some 日本語 here and we can get started, e.g., パーリ語 (pali पाऴि 巴利語、略して巴語) は多量の文献を持つ南伝仏教経典（『パーリ語経典』）で主に使用される言語。バーリ語とも。なお日本における仏教関連の辞典や書物では pl などと略称される</textarea>
       </p>
     </div>
 
@@ -25,6 +28,11 @@
       ... (enter some Japanese text in the box above) ...
     </div>
 
+    <div id="d3-table">
+      Answer key:
+      <ul id="d3-answer-list">
+      </ul>
+    </div>
 
     <div id="test">
       <p>

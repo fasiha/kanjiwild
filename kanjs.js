@@ -12,6 +12,73 @@ $( document ).ready(function() {
     var input_japanese = $('#input_japanese');
     var display = $('div#display');
 
+    var kanji2number = {};
+    for (var i=0; i<kanji.length; i++) {
+        kanji2number[kanji.charAt(i)] = i;
+    }
+    
+
+    var span_kanjis = function () {
+        var text = $('#input_japanese').val();
+        var han = XRegExp('\\p{Han}');
+        var allhan = {};
+        var allhan_arr = []
+        var fixed = XRegExp.replace(text, han, function(val, loc) {
+            if (!(val in allhan)) {
+                allhan[val] = loc;
+                allhan_arr.push(val);
+            }
+            return '<span class="kanji '+val+'">'+val+'</span>';}, 'all');
+        $('#display').html(fixed);
+        
+        var kanji2list = function (x) {
+            var num = kanji2number[x];
+            if (num) {
+                return x + ", (" + kw[num] + ", " + num + ") ";
+            } else {
+                return x + " (not in RTK) ";
+            }
+        };
+
+        var li = d3.select("#d3-answer-list").selectAll("li")
+            .data(allhan_arr);
+
+        li.exit().remove();
+
+        li.enter()
+            .append("li")
+            .text(kanji2list)
+            .attr(class, function(x, i) {return "kanji " + x;})
+            .append("input")
+            .attr({
+                type: "text", 
+                value: function (x,i) {return x;}
+            })
+        ;
+                            /*
+                            $("<input/>", {
+                                type:"text", size: 4,
+                                'class':'qkanji_in',
+                                value: show_kanji ? known_kanji[j_cnt] : ""
+                            })*/
+
+        $('.kanji').click(function() { 
+            var k = $(this)[0].innerText;
+            if ($('style#' + k).length == 0) {
+                // FIXME: Not compatible with IE8: http://stackoverflow.com/a/14898381/500207
+                var css = document.createElement("style");
+                css.id = k;
+                css.type = "text/css";
+                css.innerHTML = '.' + k + " { background: yellow }";
+                document.head.appendChild(css);
+            }
+        });
+        
+
+    }
+    input_japanese.bind("input propertychange", span_kanjis);
+    span_kanjis();
+
     /* Hide the test, render it visible as soon as test text is entered */
     $("#test").css("visibility", "hidden");
 
@@ -141,7 +208,7 @@ $( document ).ready(function() {
         }
 
         // Final tweaks of the HTML itself with some values, now known
-        display.text(japanese).css("font-weight", "bold");
+        // display.text(japanese).css("font-weight", "bold");
         $('#number_known').text(total_known);
         $('#kanji_number_left').text(total_known);
         $('#kw_number_left').text(total_known);
@@ -159,6 +226,8 @@ $( document ).ready(function() {
     $('#heisig_index').bind("input propertychange", update_input_text);
     $('#show-all-kanji').change(update_input_text);
     $('#show-all-kw').change(update_input_text);
+
+    update_input_text();
 
     // A minor issue: make the answer key hidden by default and enable
     // you to toggle it.
@@ -184,4 +253,7 @@ $( document ).ready(function() {
     function randkanji(n) {return getrand(kanji.slice(0, n));}
     // To play, call randkw(743) (replacing 743 with whatever Heisig number
     // you're on) to get a random keyword.
+
+    
+
 });
