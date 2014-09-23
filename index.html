@@ -1,89 +1,49 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <meta charset="UTF-8">
+    <title>Kanji in the Wild</title>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
     <script src="xregexp-all-min.js" charset="utf-8"></script>
-    
+    <script src="underscore-min.js" charset="utf-8"></script>
+
     <script type="text/javascript" src="data.js"></script>
     <script type="text/javascript" src="kanjs.js"></script>
     <link rel="stylesheet" type="text/css" href="kanjs.css">
-    <meta charset="UTF-8">
+    <style>
+    div#answers p {margin: 0em;}
+    #recognition p span.recognized-kanji-not-in-text {background:yellow;}
+    .recognized-kanji {background:lightgreen;}
+    p.recognized-kanji {background: none;}
+    .recognized-keyword {background:lightgreen;}
+    </style>
   </head>
   <body>
 
 
-    <div id="input_area">
-      <p>
-        What kanji number are you at in Heisig's <i>Remembering the Kanji</i>, volumes 1 (6th edition) and 3? <input type="text" size="4" id="heisig_index" value="2200">
-      </p>
-      <p>
-        <textarea type="text" rows="4" cols="50" id="input_japanese">Insert some 日本語 here and we can get started, e.g., パーリ語 (pali पाऴि 巴利語、略して巴語) は多量の文献を持つ南伝仏教経典（『パーリ語経典』）で主に使用される言語。バーリ語とも。なお日本における仏教関連の辞典や書物では pl などと略称される</textarea>
-      </p>
+    <div id="input-div">
+      <form id="input-form">
+      <label><input type="radio" name="knowledge-selector" id="use-heisig-number" checked>Heisig number (2200 for RtK1, 3028 for RTK1 and RTK3): </label>
+      <input type="text" size="4" id="heisig-number" value="2200"><br>
+
+      <label><input type="radio" name="knowledge-selector" id="use-kanji-list">Enter a list of kanji you know:
+      <textarea id="custom-kanji-list" rows="1" cols="50"></textarea></label>
+      </form>
+
+      <textarea type="text" rows="4" cols="50" id="input-japanese">おはようございます。私は日本語を習っています。日本語大好き！</textarea>
     </div>
 
-
-
-    <div id="display">
-      ... (enter some Japanese text in the box above) ...
+    <div id="output-div">
+    <div id="redisplay"></div>
+    <div id="recognition-container">
+      <button id="recognize-kanji-button">Show all kanji</button>
+      <div id="recognition"></div>
     </div>
-
-    <div id="d3-table">
-      Answer key:
-      <ul id="d3-answer-list">
-      </ul>
+    <div id="answers-container">
+      <p id="show-answers">Show answers</p>
+      <div id="answers"></div>
     </div>
-
-    <div id="test">
-      <p>
-        You know <span id="number_known">0</span> kanji!
-      </p>
-
-      <p>
-        You need to enter <span id="kanji_number_left">0</span> kanji and <span id="kw_number_left">0</span> English keywords below. Or, show all <input type="checkbox" id="show-all-kanji"> kanji; or show all <input type="checkbox" id="show-all-kw"> keywords.
-      </p>
-
-      <div id="questions">
-        <table id="input_table" border="0">
-          <tbody>
-            <tr>
-              <td class="question_kanji"><input type="text" class="qkanji_in" value="" style="color: green;"></td>
-              <td class="question_kw"><input type="text" class="qkw_in" value="" style="color: green;"></td>
-            </tr>
-            <tr>
-              <td class="question_kanji"><input type="text" class="qkanji_in" value="" style="color: green;"></td>
-              <td class="question_kw"><input type="text" class="qkw_in" value="" style="color: green;"></td>
-            </tr>
-            <tr>
-              <td class="question_kanji"><input type="text" class="qkanji_in" value="" style="color: green;"></td>
-              <td class="question_kw"><input type="text" class="qkw_in" value="" style="color: green;"></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <p>Answer key: <span id="toggle_answer_button">(toggle)</span>.</p>
-      <div id="answers">
-        <table id="answer_table" border="0">
-          <tbody>
-            <tr>
-              <td>日, #12</td>
-              <td>day</td>
-            </tr>
-            <tr>
-              <td>本, #224</td>
-              <td>book</td>
-            </tr>
-            <tr>
-              <td>語, #371</td>
-              <td>word</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
     </div>
-
-
-
   </body>
 </html>

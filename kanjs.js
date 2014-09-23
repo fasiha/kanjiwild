@@ -1,259 +1,208 @@
-$( document ).ready(function() {
+// Contains shared global state
+var app = {"recognized-kanji" : {}};
 
-    // Make *sure* you load `data.js` first, in the HTML file! That
-    //JavaScript file will load keywords as a single huge
-    //comma-separated string, so split it at commas. The kanji is also
-    //a single 3029-long string of kanji, but don't split that into an
-    //array, leave it as a string.
-    kw = kw.split(',');
-    // Leave the kanji as a string // kanji = kanji.split('');
+// Kanji regexp
+var han = XRegExp('(\\p{Han})', 'g');
 
-    /* Store tags as their own variables */
-    var input_japanese = $('#input_japanese');
-    var display = $('div#display');
+// Make *sure* you load `data.js` first! Build an array of keywords.
+kw = kw.split(',');
 
-    var kanji2number = {};
-    for (var i=0; i<kanji.length; i++) {
-        kanji2number[kanji.charAt(i)] = i;
+// Build a dictionary with kanji as keys and numbers as values
+var kanji2number = {};
+for (var i = 0; i < kanji.length; i++) {
+    kanji2number[kanji.charAt(i)] = i;
+}
+
+// heisigNum >= 1
+var buildKnownKanjiDictHeisig = function(heisigNum) {
+    var dict = {};
+    heisigNum = Math.min(heisigNum, kanji.length);
+    for (var i = 0; i < heisigNum; i++) {
+        dict[kanji.charAt(i)] = i;
     }
-    
+    return dict;
+};
 
-    var span_kanjis = function () {
-        var text = $('#input_japanese').val();
-        var han = XRegExp('\\p{Han}');
-        var allhan = {};
-        var allhan_arr = []
-        var fixed = XRegExp.replace(text, han, function(val, loc) {
-            if (!(val in allhan)) {
-                allhan[val] = loc;
-                allhan_arr.push(val);
+// knownKanji is a string
+var buildKnownKanjiDictInput =
+    function(knownKanjiString) {
+        var dict = {};
+        XRegExp.forEach(knownKanjiString, han,
+                        function(match, idx) { dict[match] = idx; });
+        // var uniqueKanji = _.unique(knownKanjiString.match(han));
+        return dict;
+    }
+
+var japaneseInputChanged = function() {
+    if (app['known-kanji'] === undefined) {
+        console.error("Warning: can't parse input without set of known kanji.");
+        return;
+    }
+    var text = d3.select('#input-japanese').property('value');
+
+    var recognizableDict = {};
+    var recognizableArr = [];
+    // var uniqueKanji = _.unique(text.match(han));
+    var html = XRegExp.replace(text, han, function(fullMatch, kanji, idx, str) {
+        if (kanji in app['known-kanji']) {
+            if (!(kanji in recognizableDict)) {
+                recognizableDict[kanji] = idx;
+                recognizableArr.push({kanji : kanji, firstAppearance : idx});
             }
-            return '<span class="kanji '+val+'">'+val+'</span>';}, 'all');
-        $('#display').html(fixed);
-        
-        var kanji2list = function (x) {
-            var num = kanji2number[x];
-            if (num) {
-                return x + ", (" + kw[num] + ", " + num + ") ";
+
+            return '<span class="any-kanji known-kanji ' + kanji + '">' +
+                   kanji + '</span>';
+        }
+        return '<span class="any-kanji ' + kanji + '">' + kanji + '</span>';
+    }, 'all');
+    d3.select("#redisplay").html(html);
+    app['recognizable-kanji'] = recognizableArr;
+    // app['recognized-kanji'] = {};
+
+    d3.selectAll('.known-kanji').on('click', function() {
+        var thisKanji = this.innerText;
+        if (!(thisKanji in app['recognized-kanji'])) {
+            app['recognized-kanji'][thisKanji] = 1;
+        }
+        updateRecognized();
+    });
+
+    showAllRecognizable();
+    updateRecognized();
+};
+
+// need some way of deleting recognized kanji via DOM from DOM &
+// app['recognized-kanji']
+function updateRecognized() {
+    // turn all off then selectively turn some on ***in the redisplay***
+    d3.selectAll('.any-kanji').classed('recognized-kanji', false);
+    _.intersection(_.keys(app['recognized-kanji']),
+                   _.pluck(app['recognizable-kanji'], 'kanji'))
+        .forEach(function(aKanji) {
+        d3.selectAll('.any-kanji.' + aKanji).classed('recognized-kanji', true);
+    });
+
+    // In *recognition* section, update the recognized-but-not-in-text blocks
+    // manually. This is because data.enter()/.exit() won't do anything when we
+    // have all the kanji already in app['recognized-kanji'] and go from Heisig
+    // number 1 to 2200.
+     _.difference(_.keys(app['recognized-kanji']),
+                 _.pluck(app['recognizable-kanji'], 'kanji'))
+        .forEach(function(aKanji) {
+        d3.selectAll('#recognition .' + aKanji).classed({
+            'recognized-kanji' : false,
+            'recognized-kanji-not-in-text' : true
+        });
+    });
+    _.intersection(_.keys(app['recognized-kanji']),
+                 _.pluck(app['recognizable-kanji'], 'kanji'))
+        .forEach(function(aKanji) {
+        d3.selectAll('#recognition .' + aKanji).classed({
+            'recognized-kanji' : true,
+            'recognized-kanji-not-in-text' : false
+        });
+    });
+
+    // Update the keyword input area
+    var data = d3.select('#recognition').selectAll('p').data(
+        _.intersection(_.keys(app['recognized-kanji']),
+                       _.pluck(app['recognizable-kanji'], 'kanji')),
+        function(d) { return d; });
+
+    var ps = data.enter().append("p");
+    ps.append("span")
+        .property({
+            "id" : function(d) { return "recognized-" + d; },
+        })
+        .attr('class', function(d) { return d; })
+        .classed({
+            'recognized-kanji' : true,
+            'recognized-kanji-not-in-text' : false
+        })
+        .text(function(d) { return d + " "; });
+
+    ps.append("input")
+        .property({
+            type : "text",
+            size : "10",
+                   // this isn't the answer key!
+                   // value : function(d) { return kw[kanji2number[d]]; },
+        })
+        .on("input", function(d) {
+            var thisKw = this.value;
+            _foo = this;
+            if (thisKw === kw[kanji2number[d]]) {
+                // Don't bother telling EVERYONE you've now correctly added
+                // keyword:
+                // d3.selectAll('.recognized-kanji.' +
+                // d).classed('recognized-keyword', true);
+
+                // Mark this input box as recognized-keyword
+                this.classList.add('recognized-keyword');
             } else {
-                return x + " (not in RTK) ";
-            }
-        };
-
-        var li = d3.select("#d3-answer-list").selectAll("li")
-            .data(allhan_arr);
-
-        li.exit().remove();
-
-        li.enter()
-            .append("li")
-            .text(kanji2list)
-            .attr(class, function(x, i) {return "kanji " + x;})
-            .append("input")
-            .attr({
-                type: "text", 
-                value: function (x,i) {return x;}
-            })
-        ;
-                            /*
-                            $("<input/>", {
-                                type:"text", size: 4,
-                                'class':'qkanji_in',
-                                value: show_kanji ? known_kanji[j_cnt] : ""
-                            })*/
-
-        $('.kanji').click(function() { 
-            var k = $(this)[0].innerText;
-            if ($('style#' + k).length == 0) {
-                // FIXME: Not compatible with IE8: http://stackoverflow.com/a/14898381/500207
-                var css = document.createElement("style");
-                css.id = k;
-                css.type = "text/css";
-                css.innerHTML = '.' + k + " { background: yellow }";
-                document.head.appendChild(css);
+                this.classList.remove('recognized-keyword');
             }
         });
-        
+}
 
+function showAllRecognizable() {
+    var data = d3.select("#answers").selectAll("p").data(
+        app['recognizable-kanji'], function(d) { return d.kanji; });
+
+    data.exit().remove();
+
+    var ps = data.enter().append("p").text(
+        function(d) { return d.kanji + " " + kw[kanji2number[d.kanji]]; });
+}
+
+$(document).ready(function() {
+
+    // When the input text changes, ...
+    d3.select("#input-japanese").on('input', japaneseInputChanged);
+    //$("#input-japanese").bind('input propertychange', japaneseInputChanged);
+
+    // Helper function to attach a listener to an input field when an
+    // appropriate radio box is enabled
+    function inputAndRadioAddListener(inputSelector, radioSelector, func) {
+        d3.select(inputSelector).on('input', function() {
+            if (d3.select(radioSelector).property('checked')) {
+                app['known-kanji'] =
+                    func(d3.select(inputSelector).property('value'));
+                japaneseInputChanged();
+            }
+        });
     }
-    input_japanese.bind("input propertychange", span_kanjis);
-    span_kanjis();
-
-    /* Hide the test, render it visible as soon as test text is entered */
-    $("#test").css("visibility", "hidden");
-
-    /* There are two major functions here. `update_input_text` reads
-     the Japanese input as well as the Heisig number entered, finds the
-     relevant kanji, and populates four arrays:
-
-     1- known_kanji, containing kanji,
-     2- known_kw, their associated keywords,
-     3- known_hnum, the associated Heisig number,
-     4- known_location, the position of the kanji in the input string.
-
-     The second major function is called `check_answers` and is
-     defined *inside* `update_input_text`. It is the callback
-     triggered upon changes to the textboxes that accept the
-     individual kanji and keywords (together called the "questions" of
-     the application).
-     */
-
-    /* When textarea is updated... */
-    var update_input_text = function () {
-        // Enable visibility of the test section
-        $("#test").css("visibility", "visible");
-
-        // These arrays store the relevant input kanji and related data
-        var known_kanji = [];
-        var known_kw = [];
-        var known_hnum = [];
-        var known_location = [];
-
-        // The text input
-        var japanese = input_japanese.val();
-
-        // The Heisig number you've learned
-        var hnum = Number($("#heisig_index").val());
-
-        // These two tables are the "question" and "answers" tables
-        var answer_table = $("<table/>", {id: "answer_table", border: 0});
-        var input_table = $("<table/>", {id: "input_table", border: 0});
-
-        // Now, find all the kanji in the input that you know,
-        // populate the `known_kanji` and associated arrays, and
-        // populate `answer_table` with the answer key.
-        var j_cnt, total_known=0;
-        for (j_cnt=0; j_cnt<hnum; j_cnt++) {
-            var idx = japanese.indexOf(kanji[j_cnt]);
-            if (idx >= 0) {
-                known_kanji.push(kanji[j_cnt]);
-                known_hnum.push(j_cnt+1);
-                known_kw.push(kw[j_cnt]);
-                known_location.push(idx);
-
-                $('<tr/>', {
-                    html: $('<td/>', {
-                        text: kanji[j_cnt] + ", #" + String(j_cnt+1)
-                    }).add($("<td/>", {
-                        text: kw[j_cnt]
-                    }))}).appendTo(answer_table);
-                total_known++;
-            };
+    inputAndRadioAddListener("#heisig-number", "#use-heisig-number",
+                             function(x) {
+        var heisigInt = parseInt(x);
+        if (isNaN(heisigInt) || (heisigInt <= 0)) {
+            return {};
         }
+        return buildKnownKanjiDictHeisig(heisigInt);
+    });
+    inputAndRadioAddListener("#custom-kanji-list", "#use-kanji-list",
+                             buildKnownKanjiDictInput);
 
-        // Showing all kanji or keywords?
-        var show_kanji = $('#show-all-kanji')[0].checked;
-        var show_kw = $('#show-all-kw')[0].checked;
+    // Set up app['known-kanji'] for the HTML default:
+    app['known-kanji'] = buildKnownKanjiDictHeisig(
+        parseInt(d3.select("#heisig-number").property('value')));
+    // Run once
+    japaneseInputChanged();
 
-        // This function is the second major function here. This will
-        // get invoked when "questions" section of the application is
-        // changed. It will build a list of kanji you've input, and if
-        // it's one of the kanji the app expects you to know, it'll
-        // mark it green, otherwise red. For each kanji it marks
-        // green, it checks the associated English Heisig keyword and
-        // makes sure it matches.
-        var check_answers = function() {
-            var kwleft = total_known;
-            var kwlist = $('input.qkw_in');
-            var kanji_answers=[];
-            // Also possible: `push(val.value)` and
-            // `push($(val).attr("value"))`
-            $('input.qkanji_in').each(function(i, val) {
-                var knownidx = known_kanji.indexOf(this.value);
-                if (knownidx>=0) {
-                    kanji_answers.push(this.value);
-                    $(this).css("color", "green");
+    // If you click on the custom kanji box, select its radio button
+    d3.select("#custom-kanji-list").on('click', function() {
+        d3.select("#use-kanji-list").property('checked', true);
+    });
+    // And similarly for the Heisig number box
+    d3.select("#heisig-number").on('click', function() {
+        d3.select("#use-heisig-number").property('checked', true);
+    });
 
-                    // Check keyword
-                    if (0 == kwlist[i].value.localeCompare(known_kw[knownidx])) {
-                        $(kwlist[i]).css("color", "green");
-                        kwleft--;
-                    }
-                    else {
-                        $(kwlist[i]).css("color", "red");
-                    }
-                }
-                else {
-                    $(this).css("color", "red");
-                }
-            });
-
-            // Update the HTML element indicating # left and correct
-            var nkanji_right = $.unique(kanji_answers).length;
-            $('#kanji_number_left').text(total_known - nkanji_right);
-            $('#kw_number_left').text(kwleft);
-        };
-
-        // The above `check_answers` function is bound to the input
-        // textboxes that accept kanji and keywords. Here, we build
-        // that table of inputs, one row for each kanji that you
-        // should know.
-        for (j_cnt=0; j_cnt < total_known; j_cnt++) {
-            $('<tr/>', {
-                html:
-                $('<td/>', {"class": "question_kanji",
-                            html: $("<input/>", {
-                                type:"text", size: 4,
-                                'class':'qkanji_in',
-                                value: show_kanji ? known_kanji[j_cnt] : ""
-                            }).bind("input propertychange", check_answers)
-                           }).add(
-                $("<td/>", {"class":"question_kw",
-                            html: $("<input/>",
-                                    {type:"text", size: 4,
-                                     'class':'qkw_in',
-                                     value: show_kw ? known_kw[j_cnt] : ""
-                                    }).bind("input propertychange", check_answers)}))
-            }).appendTo(input_table);
-        }
-
-        // Final tweaks of the HTML itself with some values, now known
-        // display.text(japanese).css("font-weight", "bold");
-        $('#number_known').text(total_known);
-        $('#kanji_number_left').text(total_known);
-        $('#kw_number_left').text(total_known);
-
-        $("#answers").html('');
-        $("#questions").html('');
-
-        $("#questions").append(input_table);
-        $("#answers").append(answer_table);
-    };
-
-    // Bind the above callback to both the practice input and the
-    // Heisig number input
-    input_japanese.bind("input propertychange", update_input_text);
-    $('#heisig_index').bind("input propertychange", update_input_text);
-    $('#show-all-kanji').change(update_input_text);
-    $('#show-all-kw').change(update_input_text);
-
-    update_input_text();
-
-    // A minor issue: make the answer key hidden by default and enable
-    // you to toggle it.
-    var toggle_answer_key = function(obj) {
-        var ans = $('div#answers');
-        var currently = ans.css("visibility");
-        if (0 == currently.localeCompare("visible")) {
-            ans.css("visibility", "hidden");
-        }
-        else {
-            ans.css("visibility", "visible");
-        }
-    };
-    $('div#answers').css("visibility", "hidden");
-    $('span#toggle_answer_button').click(toggle_answer_key);
-
-    // Finally, create a little fun-function to test kanji in the Javascript
-    // console!
-    function getrand(items) {
-        return items[Math.floor(Math.random() * items.length)];
-    }
-    function randkw(n) {return getrand(kw.slice(0, n));}
-    function randkanji(n) {return getrand(kanji.slice(0, n));}
-    // To play, call randkw(743) (replacing 743 with whatever Heisig number
-    // you're on) to get a random keyword.
-
-    
+    d3.select('#recognize-kanji-button').on('click', function() {
+        app['recognized-kanji'] =
+            _.invert(_.union(_.keys(app['recognized-kanji']),
+                             _.pluck(app['recognizable-kanji'], 'kanji')));
+        updateRecognized();
+    })
 
 });
