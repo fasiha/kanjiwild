@@ -12,41 +12,60 @@
     <script type="text/javascript" src="kanjs.js"></script>
     <link rel="stylesheet" type="text/css" href="kanjs.css">
     <style>
+    body {
+    font-family: Helvetica, "Helvetica Neue", Arial, "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro", Osaka, "メイリオ", Meiryo, "ＭＳ Ｐゴシック", "MS PGothic", "小塚明朝 Pro L", serif;
+    }
+
     .hidden-item {display: none;}
+    #redisplay {color: gray; font-size: 1.25em;}
     div#answers p, div#recognition p {margin: 0em;}
     #recognition div span.recognized-kanji-not-in-text {background:yellow;}
     .recognized-kanji {background:lightgreen;}
 
     .recognized-keyword {background:lightgreen;}
     .any-kanji, .like-link {cursor: pointer;}
-    .recognized-container {display: inline-block;}
+    .any-kanji {color: black;}
+    .recognized-container {
+      display: inline-block;
+      margin-right: 2em;}
     </style>
   </head>
   <body>
-
+  <h1>Kanji in the Wild</h1>
 
     <div id="input-div">
+    <h2>What kanji do you know?</h1>
       <form id="input-form">
-      <label><input type="radio" name="knowledge-selector" id="use-heisig-number" checked>Heisig number (2200 for RtK1, 3028 for RTK1 and RTK3): </label>
+      <label><input type="radio" name="knowledge-selector" id="use-heisig-number" checked>Up to Heisig <em>Remembering the Kanji</em> number (hint: 2200 for volume 1, 3028 for volumes 1 and 3): </label>
       <input type="text" size="4" id="heisig-number" value="2200"><br>
 
-      <label><input type="radio" name="knowledge-selector" id="use-kanji-list">Enter a list of kanji you know:
+      <label><input type="radio" name="knowledge-selector" id="use-kanji-list">All kanji from the following list:
       <textarea id="custom-kanji-list" rows="1" cols="50"></textarea></label>
       </form>
 
+      <h2>Enter some Japanese text</h2>
       <textarea type="text" rows="4" cols="80em" id="input-japanese">おはようございます。私は日本語を習っています。日本語大好き！</textarea>
     </div>
 
     <div id="output-div">
+    <h2>Click on all the kanji you recognize</h2>
+
     <div id="redisplay"></div>
+
     <div id="recognition-container">
+      <h2>Enter the English <em>Rembering the Kanji</em> keywords here</h2>
       <button id="recognize-kanji-button">Show all kanji</button>
       <div id="recognition"></div>
     </div>
+
     <div id="answers-container">
+      <h2>Answer key</h2>
       <button id="show-answers">Toggle answer key</button>
       <div id="answers" class="hidden-item"></div>
     </div>
     </div>
+
+    <a href="https://github.com/fasiha/kanjiwild"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/a6677b08c955af8400f44c6298f40e7d19cc5b2d/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677261795f3664366436642e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png"></a>
+
   </body>
 </html>

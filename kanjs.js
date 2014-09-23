@@ -28,7 +28,7 @@ var buildKnownKanjiDictInput =
     function(knownKanjiString) {
         var dict = {};
         XRegExp.forEach(knownKanjiString, han,
-                        function(match, idx) { dict[match] = idx; });
+                        function(match, idx) { dict[match[0]] = idx; });
         // var uniqueKanji = _.unique(knownKanjiString.match(han));
         return dict;
     }
