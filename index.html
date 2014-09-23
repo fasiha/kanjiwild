@@ -12,11 +12,14 @@
     <script type="text/javascript" src="kanjs.js"></script>
     <link rel="stylesheet" type="text/css" href="kanjs.css">
     <style>
-    div#answers p {margin: 0em;}
-    #recognition p span.recognized-kanji-not-in-text {background:yellow;}
+    .hidden-item {display: none;}
+    div#answers p, div#recognition p {margin: 0em;}
+    #recognition div span.recognized-kanji-not-in-text {background:yellow;}
     .recognized-kanji {background:lightgreen;}
-    p.recognized-kanji {background: none;}
+
     .recognized-keyword {background:lightgreen;}
+    .any-kanji, .like-link {cursor: pointer;}
+    .recognized-container {display: inline-block;}
     </style>
   </head>
   <body>
@@ -31,7 +34,7 @@
       <textarea id="custom-kanji-list" rows="1" cols="50"></textarea></label>
       </form>
 
-      <textarea type="text" rows="4" cols="50" id="input-japanese">おはようございます。私は日本語を習っています。日本語大好き！</textarea>
+      <textarea type="text" rows="4" cols="80em" id="input-japanese">おはようございます。私は日本語を習っています。日本語大好き！</textarea>
     </div>
 
     <div id="output-div">
@@ -41,8 +44,8 @@
       <div id="recognition"></div>
     </div>
     <div id="answers-container">
-      <p id="show-answers">Show answers</p>
-      <div id="answers"></div>
+      <button id="show-answers">Toggle answer key</button>
+      <div id="answers" class="hidden-item"></div>
     </div>
     </div>
   </body>

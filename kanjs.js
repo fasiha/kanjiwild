@@ -40,6 +40,10 @@ var japaneseInputChanged = function() {
     }
     var text = d3.select('#input-japanese').property('value');
 
+    // Do some basic, poor man's Markdown processing to at least respect line
+    // breaks
+    text = text.replace(/\n/g, '<br>\n');
+
     var recognizableDict = {};
     var recognizableArr = [];
     // var uniqueKanji = _.unique(text.match(han));
@@ -104,12 +108,12 @@ function updateRecognized() {
     });
 
     // Update the keyword input area
-    var data = d3.select('#recognition').selectAll('p').data(
+    var data = d3.select('#recognition').selectAll('div').data(
         _.intersection(_.keys(app['recognized-kanji']),
                        _.pluck(app['recognizable-kanji'], 'kanji')),
         function(d) { return d; });
 
-    var ps = data.enter().append("p");
+    var ps = data.enter().append("div").classed('recognized-container', true);
     ps.append("span")
         .property({
             "id" : function(d) { return "recognized-" + d; },
@@ -143,6 +147,12 @@ function updateRecognized() {
                 this.classList.remove('recognized-keyword');
             }
         });
+    ps.append('span').text('×').classed('like-link', true).on('click',
+                                                              function(d) {
+        this.parentNode.remove();
+        delete app['recognized-kanji'][d];
+        updateRecognized();
+    });
 }
 
 function showAllRecognizable() {
@@ -198,11 +208,17 @@ $(document).ready(function() {
         d3.select("#use-heisig-number").property('checked', true);
     });
 
-    d3.select('#recognize-kanji-button').on('click', function() {
+    d3.select('button#recognize-kanji-button').on('click', function() {
         app['recognized-kanji'] =
             _.invert(_.union(_.keys(app['recognized-kanji']),
                              _.pluck(app['recognizable-kanji'], 'kanji')));
         updateRecognized();
+    });
+
+    // Toggle answer key functionality
+    d3.select("button#show-answers").on('click', function() {
+        var current = d3.select('div#answers').classed('hidden-item');
+        d3.select('div#answers').classed('hidden-item', !current);
     })
 
 });
