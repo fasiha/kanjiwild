@@ -169,7 +169,7 @@ function updateRecognized() {
     // So it does some wasteful work but I think that leads to understandeable
     // code. If performance ever becomes an issue, it can be addressed then.
 
-
+    // Display stats!
     var recognizedInText = _.intersection(_.keys(app['recognized-kanji']), app['recognizable-kanji']);
 
     var stats = d3.select("#stats");
@@ -193,6 +193,13 @@ function updateRecognized() {
     if (numUnknown > 0) {
         appendToList("Number of kanji you need to learn to read input text: " + numUnknown);
     }
+
+    d3.select('#redisplay-stats').html(
+        (recognizedInText.length == numRecognizable
+             ? "All " + recognizedInText.length
+             : recognizedInText.length) +
+        " kanji found, " +
+        (numLeftToRecognize > 0 ? numLeftToRecognize : "none") + " left!");
 
     // In the redisplay (the thing that you click on to select kanji), remove
     // the ".recognized-kanji" class from all kanji, then add it back to ones
