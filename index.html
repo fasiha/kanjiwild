@@ -130,6 +130,10 @@
       margin-top: 1em;
       margin-bottom: 0em;
     }
+    #answers {
+      background-color: #888;
+      color: #aaa;
+    }
   </style>
 </head>
 <body>
@@ -167,18 +171,15 @@
 
         <div id="redisplay"></div>
         <button class="pure-button" id="recognize-kanji-button">Show all known kanji</button>
+        <button class="pure-button" id="show-answers">Toggle answer key</button>
 
         <p id="recognition-instructions"></p>
         <div id="recognition"></div>
-      </div>
-
-      <div id="stats-container"  class="pure-u-1">
-        <h2>Additional information</h2>
-        <div id="stats"></div>
-
-        <button class="pure-button" id="show-answers">Toggle answer key</button>
         <div id="answers" class="hidden-item"></div>
       </div>
+
+      <p>Some additional statistics:</p>
+      <div id="stats"></div>
     </div>
 
     <div id="footer" class="pure-u-1">
