@@ -107,7 +107,8 @@ var japaneseInputChanged = function() {
     }, 'all');
     // Convert the dictionary to an array, sorted by index of first appearance
     // in input text.
-    app['recognizable-kanji'] = objectToKeysSortedArray(app['recognizable-kanji']);
+    app['recognizable-kanji'] =
+        objectToKeysSortedArray(app['recognizable-kanji']);
 
     // Calculate some extra data for stats.
     var unknownKanji =
@@ -170,7 +171,8 @@ function updateRecognized() {
     // code. If performance ever becomes an issue, it can be addressed then.
 
     // Display stats!
-    var recognizedInText = _.intersection(_.keys(app['recognized-kanji']), app['recognizable-kanji']);
+    var recognizedInText = _.intersection(_.keys(app['recognized-kanji']),
+                                          app['recognizable-kanji']);
 
     var stats = d3.select("#stats");
     var numUnknown = app['unknown-kanji'].length;
@@ -188,10 +190,13 @@ function updateRecognized() {
                                      ? "all"
                                      : numLeftToRecognize) +
                          " remain to be found)")));
-    appendToList("Total number of kanji in input text, known and unknown: " + numTotalKanji);
-    appendToList("Total number of kanji you know: " + _.keys(app['known-kanji']).length);
+    appendToList("Total number of kanji in input text, known and unknown: " +
+                 numTotalKanji);
+    appendToList("Total number of kanji you know: " +
+                 _.keys(app['known-kanji']).length);
     if (numUnknown > 0) {
-        appendToList("Number of kanji you need to learn to read input text: " + numUnknown);
+        appendToList("Number of kanji you need to learn to read input text: " +
+                     numUnknown);
     }
 
     d3.select('#redisplay-stats').html(
@@ -261,7 +266,7 @@ function updateRecognized() {
             "id" : function(d) { return "recognized-" + d; },
         })
         .attr('class', function(d) { return d; })
-        .classed({'kanji-for-recognition': true})
+        .classed({'kanji-for-recognition' : true})
         .text(function(d) { return d; });
 
     newDivs.append("form")
@@ -353,8 +358,8 @@ $(document).ready(function() {
     d3.select('button#recognize-kanji-button').on('click', function() {
         // This turns out to not change the sort order of kanjiSortedArray,
         // which is great!
-        app['recognized-kanji'] = _.invert(
-            _.union(_.keys(app['recognized-kanji']), app['recognizable-kanji']));
+        app['recognized-kanji'] = _.invert(_.union(
+            _.keys(app['recognized-kanji']), app['recognizable-kanji']));
         updateRecognized();
     });
 
