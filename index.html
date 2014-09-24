@@ -1,71 +1,168 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <title>Kanji in the Wild</title>
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-    <script src="xregexp-all-min.js" charset="utf-8"></script>
-    <script src="underscore-min.js" charset="utf-8"></script>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kanji in the Wild</title>
 
-    <script type="text/javascript" src="data.js"></script>
-    <script type="text/javascript" src="kanjs.js"></script>
-    <link rel="stylesheet" type="text/css" href="kanjs.css">
-    <style>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+  <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+  <script src="xregexp-all-min.js" charset="utf-8"></script>
+  <script src="underscore-min.js" charset="utf-8"></script>
+
+  <script type="text/javascript" src="data.js"></script>
+  <script type="text/javascript" src="kanjs.js"></script>
+
+  <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.5.0/pure-min.css">
+  <!--[if lte IE 8]>
+  <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.5.0/grids-responsive-old-ie-min.css">
+  <![endif]-->
+  <!--[if gt IE 8]><!-->
+  <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.5.0/grids-responsive-min.css">
+  <!--<![endif]-->
+  <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,600' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" type="text/css" href="kanjs.css">
+  <style>
+    html, button, input, select, textarea, .pure-g [class *= "pure-u"] {
+      font-family: Helvetica, "Helvetica Neue", Arial, Meiryo, "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro", Osaka, "メイリオ", "ＭＳ Ｐゴシック", "MS PGothic", "小塚明朝 Pro L", serif;
+      line-height: 1.6;
+    }
     body {
-    font-family: Helvetica, "Helvetica Neue", Arial, "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro", Osaka, "メイリオ", Meiryo, "ＭＳ Ｐゴシック", "MS PGothic", "小塚明朝 Pro L", serif;
+      margin-left: 0.5em;
+      margin-right : 0.5em;
     }
 
-    .hidden-item {display: none;}
-    #redisplay {color: gray; font-size: 1.25em;}
-    div#answers p, div#recognition p {margin: 0em;}
-    #recognition div span.recognized-kanji-not-in-text {background:yellow;}
-    .recognized-kanji {background:lightgreen;}
+    textarea {
+      font-size: 80%;
+    }
 
-    .recognized-keyword {background:lightgreen;}
-    .any-kanji, .like-link {cursor: pointer;}
-    .any-kanji {color: black;}
+    .hidden-item {
+      display: none;
+    }
+    #redisplay {
+      color: gray;
+      font-size: 1.5em;
+      padding: 1em 0.25em;
+      margin-top: 0em;
+      margin-bottom: .25em;
+      margin-left: 0em;
+      margin-right: 0em;
+
+      background-color: #f7f7f7;
+    }
+    div#answers p, div#recognition p {
+      margin: 0em;
+    }
+    #recognition div.recognized-kanji-not-currently-recognizable span.kanji-for-recognition {
+      background-color:yellow;
+    }
+    span.recognized-kanji, div.recognized-kanji span.kanji-for-recognition {
+      background-color:lightgreen;
+    }
+
+    .recognized-keyword {
+      background-color:lightgreen;
+    }
+    .any-kanji, .like-link {
+      cursor: pointer;
+    }
+    .any-kanji {
+      color: black;
+    }
     .recognized-container {
       display: inline-block;
-      margin-right: 2em;}
-    </style>
-  </head>
-  <body>
-  <h1>Kanji in the Wild</h1>
+      margin-right: 2em;
+    }
+    .recognized-container form {
+      display: inline-block;
+      margin-left: 0.25em;
+    }
+    div.side-by-side {
+      margin-left: 2em;
+    }
+    h1, h2 {
+      margin-bottom: 0.1em;
+      font-family: 'Open Sans', sans-serif;
+      font-weight: 600;
+      color: #777;
+    }
+    .center {
+     text-align: center;
+    }
+    .everything-skinny {
+      max-width: 50em;
+      margin: 0 auto;
+    }
+    .header-skinny {
+      max-width: 44em;
+      margin: 0 auto;
+      margin-bottom: 1em;
+      border-bottom: 1px solid #eee;
+      font-size: 125%;
+      color: darkgray;
 
-    <div id="input-div">
-    <h2>What kanji do you know?</h1>
-      <form id="input-form">
-      <label><input type="radio" name="knowledge-selector" id="use-heisig-number" checked>Up to Heisig <em>Remembering the Kanji</em> number (hint: 2200 for volume 1, 3039 for volumes 1 and 3): </label>
-      <input type="text" size="4" id="heisig-number" value="2200"><br>
+    }
+    .header-skinny h1 {
+      font-weight: 400;
+    }
+    .header-skinny h2 {
+      margin-top: 0em;
+      margin-bottom: 0.66em;
+      font-weight: 400;
+    }
+  </style>
+</head>
+<body>
+  <div class="pure-g header-skinny" >
+    <div class="pure-u-1">
+      <h1 class="center">Kanji in the Wild</h1>
+      <h2 class="center">Recognizing kanji with Heisig's <em>Remembering the Kanji</em></h2>
+    </div>
+  </div>
 
-      <label><input type="radio" name="knowledge-selector" id="use-kanji-list">All kanji from the following list:
-      <textarea id="custom-kanji-list" rows="1" cols="50"></textarea></label>
+  <div class="pure-g everything-skinny" >
+    <div class="pure-u-1">
+      <h2>Which kanji do you know?</h2>
+      <form onsubmit="return false;" id="input-form" class="pure-form">
+        <label><input type="radio" name="knowledge-selector" id="use-heisig-number" checked> <em>Remembering the Kanji</em> number </label>
+        <input type="text" size="5" id="heisig-number" value="2200"> <small>(2200 for vol. 1, 3039 for vols. 1 and 3)</small><br>
+
+        <label><input type="radio" name="knowledge-selector" id="use-kanji-list"> All kanji from the following list: </label><br>
+        <textarea class="pure-input-1" id="custom-kanji-list" rows="1" ></textarea>
       </form>
+    </div>
 
+    <div class="pure-u-1">
       <h2>Enter some Japanese text</h2>
-      <textarea type="text" rows="4" cols="80em" id="input-japanese">おはようございます。私は日本語を習っています。日本語大好き！</textarea>
+      <form class="pure-form">
+        <textarea type="text" rows="4" class="pure-input-1" id="input-japanese">おはようございます。私は日本語を習っています。日本語大好き！</textarea>
+      </form>
     </div>
 
-    <div id="output-div">
-    <h2>Click on all the kanji you recognize</h2>
+    <div id="output-div" class="pure-u-1">
+      <h2>Click on all kanji you recognize...</h2>
 
-    <div id="redisplay"></div>
+      <div class="pure-u-1">
+        <div id="redisplay"></div>
+        <button class="pure-button" id="recognize-kanji-button">Show all known kanji</button>
+      </div>
 
-    <div id="recognition-container">
-      <h2>Enter the English <em>Rembering the Kanji</em> keywords here</h2>
-      <button id="recognize-kanji-button">Show all kanji</button>
-      <div id="recognition"></div>
+      <div id="recognition-container"  class="pure-u-1">
+        <h2>...then type their English keywords here</h2>
+        <div id="recognition"></div>
+      </div>
+
+      <div id="stats-container"  class="pure-u-1">
+        <h2>Additional information</h2>
+        <div id="stats"></div>
+
+        <button class="pure-button" id="show-answers">Toggle answer key</button>
+        <div id="answers" class="hidden-item"></div>
+      </div>
     </div>
+  </div>
 
-    <div id="answers-container">
-      <h2>Answer key</h2>
-      <button id="show-answers">Toggle answer key</button>
-      <div id="answers" class="hidden-item"></div>
-    </div>
-    </div>
+  <a href="https://github.com/fasiha/kanjiwild"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/a6677b08c955af8400f44c6298f40e7d19cc5b2d/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677261795f3664366436642e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png"></a>
 
-    <a href="https://github.com/fasiha/kanjiwild"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/a6677b08c955af8400f44c6298f40e7d19cc5b2d/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677261795f3664366436642e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png"></a>
-
-  </body>
+</body>
 </html>
