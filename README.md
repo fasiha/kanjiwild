@@ -22,6 +22,6 @@ Acknowledgements
 
 James Heisig and the University of Hawaiʻi Press, as the author and publisher of *Remembering the Kanji*, have copyrights on the English keywords. These are included here without permission in `data.js`. Any use of this tool requires licensing from James Heisig or his publisher.
 
-This tool is heavily indebted to the D3.js, underscore.js, and PureCSS projects.
+This tool is heavily indebted to the D3.js, underscore.js, XRegExp, and PureCSS projects.
 
 The software portions of this tool are released by Ahmed Fasih into the public domain. See `LICENSE`.
