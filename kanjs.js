@@ -201,6 +201,11 @@ function updateRecognized() {
         " kanji found, " +
         (numLeftToRecognize > 0 ? numLeftToRecognize : "none") + " left!");
 
+    // Add some instructions:
+    d3.select("#recognition-instructions").text(
+        _.isEmpty(app['recognized-kanji']) ? ""
+                                           : "Enter English keywords here:");
+
     // In the redisplay (the thing that you click on to select kanji), remove
     // the ".recognized-kanji" class from all kanji, then add it back to ones
     // that have been previously recognized. (Some previously recognized kanji

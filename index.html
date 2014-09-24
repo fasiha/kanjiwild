@@ -50,6 +50,10 @@
 
       background-color: #f7f7f7;
     }
+    #recognition {
+      margin: 0.5em 0em;
+    }
+
     div#answers p, div#recognition p {
       margin: 0em;
     }
@@ -69,6 +73,9 @@
     .any-kanji {
       color: black;
     }
+    .any-kanji:hover:not(.recognized-kanji) {
+      background-color: #ddd;
+    }
     .recognized-container {
       display: inline-block;
       margin-right: 2em;
@@ -83,7 +90,7 @@
     h1, h2 {
       margin-bottom: 0.1em;
       font-family: 'Open Sans', sans-serif;
-      font-weight: 600;
+      font-weight: 400;
       color: #777;
     }
     .center {
@@ -119,6 +126,10 @@
     #redisplay-stats {
       margin: 0;
     }
+    #recognition-instructions {
+      margin-top: 1em;
+      margin-bottom: 0em;
+    }
   </style>
 </head>
 <body>
@@ -134,7 +145,7 @@
       <h2>Which kanji do you know?</h2>
       <form onsubmit="return false;" id="input-form" class="pure-form">
         <label><input type="radio" name="knowledge-selector" id="use-heisig-number" checked> <em>Remembering the Kanji</em> number </label>
-        <input type="text" size="5" id="heisig-number" value="2200"> <small>(2200 for vol. 1, 3039 for vols. 1 and 3)</small><br>
+        <input type="text" size="5" id="heisig-number" value="2200"> <small>(2200 in vol. 1, 3039 in vols. 1 and 3)</small><br>
 
         <label><input type="radio" name="knowledge-selector" id="use-kanji-list"> All kanji from the following list: </label><br>
         <textarea class="pure-input-1" id="custom-kanji-list" rows="1" ></textarea>
@@ -149,17 +160,15 @@
     </div>
 
     <div id="output-div" class="pure-u-1">
-      <h2>Click on all kanji you recognize...</h2>
+      <h2>Click on all kanji you recognize</h2>
 
       <div class="pure-u-1">
         <p id="redisplay-stats">6/6 found.</p>
 
         <div id="redisplay"></div>
         <button class="pure-button" id="recognize-kanji-button">Show all known kanji</button>
-      </div>
 
-      <div id="recognition-container"  class="pure-u-1">
-        <h2>...then type their English keywords here</h2>
+        <p id="recognition-instructions"></p>
         <div id="recognition"></div>
       </div>
 
