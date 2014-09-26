@@ -122,7 +122,7 @@ var japaneseInputChanged = function() {
     // that'll add it to app['recognized-kanji'] and then run updateRecognized()
     // which processes app['recognized-kanji'].
     d3.selectAll('.recognizable-kanji').on('click', function() {
-        var thisKanji = this.innerText;
+        var thisKanji = d3.select(this).text();
         if (!(thisKanji in app['recognized-kanji'])) {
             app['recognized-kanji'][thisKanji] = 1;
         }
