@@ -133,6 +133,21 @@
       background-color: #888;
       color: #aaa;
     }
+    .floating-keyword-input {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      
+      background-color: #eee;
+      z-index: 10;
+    }
+    .recognizable-kanji.recognized-kanji:hover .floating-keyword-input {
+      display: block;
+    }
+    .recognizable-kanji {
+      position: relative;
+    }
   </style>
 </head>
 <body>

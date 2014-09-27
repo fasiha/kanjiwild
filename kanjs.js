@@ -100,11 +100,14 @@ var japaneseInputChanged = function() {
                 app['recognizable-kanji'][kanji] = idx;
             }
             return '<span class="any-kanji recognizable-kanji ' + kanji + '">' +
-                   kanji + '</span>';
+                   kanji +
+                   '<div class="floating-keyword-input floating-keyword-input-' +
+                   kanji + '">' + "" +'</div></span>';
         }
         // Otherwise, just tag it with .any-kanji
         return '<span class="any-kanji ' + kanji + '">' + kanji + '</span>';
-    }, 'all');
+                                          },
+                               'all');
     // Convert the dictionary to an array, sorted by index of first appearance
     // in input text.
     app['recognizable-kanji'] =
@@ -122,17 +125,59 @@ var japaneseInputChanged = function() {
     // that'll add it to app['recognized-kanji'] and then run updateRecognized()
     // which processes app['recognized-kanji'].
     d3.selectAll('.recognizable-kanji').on('click', function() {
-        var thisKanji = d3.select(this).text();
-        if (!(thisKanji in app['recognized-kanji'])) {
-            app['recognized-kanji'][thisKanji] = 1;
+        var thisKanji = d3.select(this).text().slice(0, 1);
+        if (thisKanji in app['recognized-kanji']) {
+            return;
         }
+        app['recognized-kanji'][thisKanji] = 1;
         updateRecognized();
+
+        var element = d3.selectAll(".floating-keyword-input-" + thisKanji);
+        element.append("form")
+            .classed("pure-form", true)
+            .append("input")
+            .property({type : "text", size : "10", })
+            .on("input", function() {
+                 // Without this, I think we'd hit infinite loop? Not sure though %-)
+                 d3.event.stopPropagation();
+
+                 var target = d3.select("#recognized-container-" + thisKanji)
+                                  .select("input");
+                 target.property("value", this.value);
+
+                 var elements = d3.selectAll(".floating-keyword-input-" +
+                                             thisKanji).selectAll("input");
+                 elements.property("value", this.value);
+
+                 if (this.value.toLowerCase() ==
+                     kw[kanji2number[thisKanji]].toLowerCase()) {
+                     // Mark this input box as recognized-keyword
+                     elements.classed('recognized-keyword', true);
+                     target.classed('recognized-keyword', true);
+                 } else {
+                     elements.classed('recognized-keyword', false);
+                     target.classed('recognized-keyword', false);
+                 }
+             });
+        element.append('span').text('×').classed('like-link', true).on(
+            'click', function() {
+                d3.event.stopPropagation();
+
+                var elements =
+                    d3.selectAll(".floating-keyword-input-" + thisKanji);
+                elements.html("");
+
+                d3.select("#recognized-container-" + thisKanji).remove();
+                delete app['recognized-kanji'][thisKanji];
+                updateRecognized();
+            });
     });
 
     // Note that this click-listener will only add keys to the app
     // ['recognized-kanji'] dictionary object. There may be kanji in there
     // that are no longer in app['recognizable-kanji'], i.e., the user might
-    // have removed that kanji from the input or from the set of known kanji.
+    // have removed that kanji from the input or from the set of known
+    // kanji.
     // When there are kanji that the user has clicked as 'recognized' before
     // but that are no longer going to appear in the text or that they no
     // longer wish to treat as known, these will be indicated differently.
@@ -181,7 +226,9 @@ function updateRecognized() {
     var numLeftToRecognize = numRecognizable - recognizedInText.length;
     stats.html("");
     var list = stats.append("ul");
-    var appendToList = function(s) { list.append("li").text(s); };
+    var appendToList = function(s) {
+        list.append("li").text(s);
+    };
     appendToList("Number of kanji you ought to know in input text: " +
                  numRecognizable +
                  ((numLeftToRecognize == 0)
@@ -255,16 +302,18 @@ function updateRecognized() {
     // be inside <div> tags, with a <span> tag containing the kanji, an <input>
     // tag for the keyword, and another <span> tag containing a button to delete
     // this kanji from app['recognized-kanji'].
-    var newDivs = data.enter().append("div").classed({
-        'recognized-container' : true,
-        'recognized-kanji' : true,
-        'recognized-kanji-not-currently-recognizable' : false
-    });
+    var newDivs =
+        data.enter()
+            .append("div")
+            .attr("id", function(d) { return "recognized-container-" + d; })
+            .classed({
+                 'recognized-container' : true,
+                 'recognized-kanji' : true,
+                 'recognized-kanji-not-currently-recognizable' : false
+             });
 
     newDivs.append("span")
-        .property({
-            "id" : function(d) { return "recognized-" + d; },
-        })
+        .property("id", function(d) { return "recognized-" + d; })
         .attr('class', function(d) { return d; })
         .classed({'kanji-for-recognition' : true})
         .text(function(d) { return d; });
@@ -272,31 +321,37 @@ function updateRecognized() {
     newDivs.append("form")
         .classed('pure-form', true)
         .append("input")
-        .property({
-            type : "text",
-            size : "10",
-        })
+        .property({type : "text", size : "10", })
         .on("input", function(d) {
-            var thisKw = this.value.toLowerCase();
-            _foo = this;
-            if (thisKw === kw[kanji2number[d]].toLowerCase()) {
-                // Don't bother telling EVERYONE you've now correctly added
-                // keyword:
-                // d3.selectAll('.recognized-kanji.' +
-                // d).classed('recognized-keyword', true);
+             var thisKw = this.value.toLowerCase();
+             var recognized = false;
+             if (thisKw === kw[kanji2number[d]].toLowerCase()) {
+                 recognized = true;
+                 // Don't bother telling EVERYONE you've now correctly added
+                 // keyword:
+                 // d3.selectAll('.recognized-kanji.' +
+                 // d).classed('recognized-keyword', true);
 
-                // Mark this input box as recognized-keyword
-                this.classList.add('recognized-keyword');
-            } else {
-                this.classList.remove('recognized-keyword');
-            }
-        });
+                 // Mark this input box as recognized-keyword
+                 this.classList.add('recognized-keyword');
+             } else {
+                 recognized = false;
+                 this.classList.remove('recognized-keyword');
+             }
+
+             var target = d3.selectAll('.floating-keyword-input-' + d)
+                              .selectAll('input');
+             target.property('value', this.value);
+             target.classed("recognized-keyword", recognized);
+         });
 
     newDivs.append('span').text('×').classed('like-link', true).on('click',
                                                                    function(d) {
         this.parentNode.remove();
         delete app['recognized-kanji'][d];
         updateRecognized();
+
+        var target = d3.selectAll('.floating-keyword-input-' + d).html("");
     });
 }
 
@@ -368,5 +423,4 @@ $(document).ready(function() {
         var current = d3.select('div#answers').classed('hidden-item');
         d3.select('div#answers').classed('hidden-item', !current);
     })
-
 });
