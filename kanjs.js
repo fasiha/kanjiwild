@@ -392,8 +392,11 @@ $(document).ready(function() {
             }
         };
         d3.select(inputSelector).on('click', function() {
-            d3.select(radioSelector).property('checked', true);
-            innerFunc();
+            // This if-check partially addresses #12.
+            if (d3.select(radioSelector).property('checked') == false) {
+                d3.select(radioSelector).property('checked', true);
+                innerFunc();
+            }
         });
         d3.select(inputSelector).on('input', innerFunc);
 
