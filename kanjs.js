@@ -56,6 +56,48 @@ function buildKnownKanjiDictInput(knownKanjiString) {
     return dict;
 }
 
+var keywordListener = function(thisKanji) {
+    // Without this, I think we'd hit infinite loop? Not
+    // sure though %-)
+    if (d3.event) {
+        d3.event.stopPropagation();
+    } else if (window.event) {
+        window.event.stopPropagation();
+    }
+
+    var target =
+        d3.select("#recognized-container-" + thisKanji).select("input");
+    target.property("value", this.value);
+
+    var elements =
+        d3.selectAll(".floating-keyword-input-" + thisKanji).selectAll("input");
+    elements.property("value", this.value);
+
+    if (this.value.toLowerCase() == kw[kanji2number[thisKanji]].toLowerCase()) {
+        // Mark this input box as recognized-keyword
+        elements.classed('recognized-keyword', true);
+        target.classed('recognized-keyword', true);
+    } else {
+        elements.classed('recognized-keyword', false);
+        target.classed('recognized-keyword', false);
+    }
+};
+
+var unrecognizeKanjiListener = function(thisKanji) {
+    if (d3.event) {
+        d3.event.stopPropagation();
+    } else if (window.event) {
+        window.event.stopPropagation();
+    }
+
+    var elements = d3.selectAll(".floating-keyword-input-" + thisKanji);
+    elements.html("");
+
+    d3.select("#recognized-container-" + thisKanji).remove();
+    delete app['recognized-kanji'][thisKanji];
+    updateRecognized();
+};
+
 // Function that gets run whenever the recognition text has changed (or whenever
 // the set of known kanji changes).
 //
@@ -85,6 +127,13 @@ var japaneseInputChanged = function() {
     // previously recognized!).
     app['recognizable-kanji'] = {};
 
+    var kanjiCurrentKw = {};
+    d3.selectAll(".recognized-container").each(function(d) {
+        kanjiCurrentKw[d] = d3.select("#recognized-container-" + d)
+                                .select("input")
+                                .property("value");
+    });
+
     // Find intersection of kanji that the user knows and kanji in the text.
     // Build the HTML representation of text: put all kanji in span tags with
     // classes that indicate their kanji-ness and whether or not they should be
@@ -95,14 +144,25 @@ var japaneseInputChanged = function() {
         // app['recognizable-kanji'] as a key and value being the earliest index
         // it appears. We'll convert it to a sorted array after we're done
         // building HTML.
-        if (kanji in app['known-kanji']) {
-            if (!(kanji in app['recognizable-kanji'])) {
+        var known = kanji in app['known-kanji'];
+        var prevRecog = kanji in app['recognized-kanji'];
+        if (known || prevRecog) {
+            if (known && !(kanji in app['recognizable-kanji'])) {
                 app['recognizable-kanji'][kanji] = idx;
+            }
+            
+            var existingHtml = "";
+            if (kanji in kanjiCurrentKw) {
+                var existingHtml =
+                    '<form class="pure-form"><input type="text" size="10" oninput="(keywordListener.bind(this, \'' +
+                    kanji + '\'))()" value="' + kanjiCurrentKw[kanji] +
+                    '"></form><span class="like-link unrecognize-kanji" onclick="(unrecognizeKanjiListener.bind(this, \'' +
+                    kanji + '\'))()">×</span>';
             }
             return '<span class="any-kanji recognizable-kanji ' + kanji + '">' +
                    kanji +
                    '<div class="floating-keyword-input floating-keyword-input-' +
-                   kanji + '">' + "" +'</div></span>';
+                   kanji + '">' + existingHtml + '</div></span>';
         }
         // Otherwise, just tag it with .any-kanji
         return '<span class="any-kanji ' + kanji + '">' + kanji + '</span>';
@@ -120,6 +180,8 @@ var japaneseInputChanged = function() {
 
     // Render the resulting HTML
     d3.select("#redisplay").html(html);
+    //d3.select("#redisplay").selectAll(".unrecognize-kanji").on("click", unrecognizeKanjiListener);
+    //d3.select("#redisplay").selectAll("input").on("input", keywordListener);
 
     // For all the recognizable-kanji, classed as such, add a click-listener
     // that'll add it to app['recognized-kanji'] and then run updateRecognized()
@@ -278,44 +340,14 @@ function updateRecognized() {
                      .classed("pure-form", true)
                      .append("input")
                      .property({type : "text", size : "10", })
-                     .on("input", function() {
-                          // Without this, I think we'd hit infinite loop? Not
-                          // sure
-                          // though %-)
-                          d3.event.stopPropagation();
-
-                          var target = d3.select("#recognized-container-" +
-                                                 thisKanji).select("input");
-                          target.property("value", this.value);
-
-                          var elements =
-                              d3.selectAll(".floating-keyword-input-" +
-                                           thisKanji).selectAll("input");
-                          elements.property("value", this.value);
-
-                          if (this.value.toLowerCase() ==
-                              kw[kanji2number[thisKanji]].toLowerCase()) {
-                              // Mark this input box as recognized-keyword
-                              elements.classed('recognized-keyword', true);
-                              target.classed('recognized-keyword', true);
-                          } else {
-                              elements.classed('recognized-keyword', false);
-                              target.classed('recognized-keyword', false);
-                          }
+                     .on("input",
+                         function() { var foo = keywordListener.bind(this, thisKanji); foo();});
+                 element.append('span')
+                     .text('×')
+                     .classed({'like-link' : true, "unrecognize-kanji" : true})
+                     .on('click', function() {
+                          var foo = unrecognizeKanjiListener.bind(this, thisKanji); foo();
                       });
-                 element.append('span').text('×').classed('like-link', true).on(
-                     'click', function() {
-                         d3.event.stopPropagation();
-
-                         var elements = d3.selectAll(
-                             ".floating-keyword-input-" + thisKanji);
-                         elements.html("");
-
-                         d3.select("#recognized-container-" + thisKanji)
-                             .remove();
-                         delete app['recognized-kanji'][thisKanji];
-                         updateRecognized();
-                     });
              });
 
     newDivs.append("span")
@@ -323,7 +355,7 @@ function updateRecognized() {
         .attr('class', function(d) { return d; })
         .classed({'kanji-for-recognition' : true})
         .text(function(d) { return d; });
-
+    // This doesn't use keywordListener because this is the recognition section.
     newDivs.append("form")
         .classed('pure-form', true)
         .append("input")
@@ -350,15 +382,17 @@ function updateRecognized() {
              target.property('value', this.value);
              target.classed("recognized-keyword", recognized);
          });
-
-    newDivs.append('span').text('×').classed('like-link', true).on('click',
-                                                                   function(d) {
+    // Again, don't use unrecognizeKanjiListener here, which is for redisplay.
+    newDivs.append('span')
+        .text('×')
+        .classed({'like-link' : true, "unrecognize-kanji" : true})
+        .on('click', function(d) {
         this.parentNode.remove();
         delete app['recognized-kanji'][d];
         updateRecognized();
 
         var target = d3.selectAll('.floating-keyword-input-' + d).html("");
-    });
+         });
 }
 
 function objectToKeysSortedArray(obj) {
