@@ -131,46 +131,6 @@ var japaneseInputChanged = function() {
         }
         app['recognized-kanji'][thisKanji] = 1;
         updateRecognized();
-
-        var element = d3.selectAll(".floating-keyword-input-" + thisKanji);
-        element.append("form")
-            .classed("pure-form", true)
-            .append("input")
-            .property({type : "text", size : "10", })
-            .on("input", function() {
-                 // Without this, I think we'd hit infinite loop? Not sure though %-)
-                 d3.event.stopPropagation();
-
-                 var target = d3.select("#recognized-container-" + thisKanji)
-                                  .select("input");
-                 target.property("value", this.value);
-
-                 var elements = d3.selectAll(".floating-keyword-input-" +
-                                             thisKanji).selectAll("input");
-                 elements.property("value", this.value);
-
-                 if (this.value.toLowerCase() ==
-                     kw[kanji2number[thisKanji]].toLowerCase()) {
-                     // Mark this input box as recognized-keyword
-                     elements.classed('recognized-keyword', true);
-                     target.classed('recognized-keyword', true);
-                 } else {
-                     elements.classed('recognized-keyword', false);
-                     target.classed('recognized-keyword', false);
-                 }
-             });
-        element.append('span').text('×').classed('like-link', true).on(
-            'click', function() {
-                d3.event.stopPropagation();
-
-                var elements =
-                    d3.selectAll(".floating-keyword-input-" + thisKanji);
-                elements.html("");
-
-                d3.select("#recognized-container-" + thisKanji).remove();
-                delete app['recognized-kanji'][thisKanji];
-                updateRecognized();
-            });
     });
 
     // Note that this click-listener will only add keys to the app
@@ -310,6 +270,52 @@ function updateRecognized() {
                  'recognized-container' : true,
                  'recognized-kanji' : true,
                  'recognized-kanji-not-currently-recognizable' : false
+             })
+            .each(function(thisKanji) {
+                 var element =
+                     d3.selectAll(".floating-keyword-input-" + thisKanji);
+                 element.append("form")
+                     .classed("pure-form", true)
+                     .append("input")
+                     .property({type : "text", size : "10", })
+                     .on("input", function() {
+                          // Without this, I think we'd hit infinite loop? Not
+                          // sure
+                          // though %-)
+                          d3.event.stopPropagation();
+
+                          var target = d3.select("#recognized-container-" +
+                                                 thisKanji).select("input");
+                          target.property("value", this.value);
+
+                          var elements =
+                              d3.selectAll(".floating-keyword-input-" +
+                                           thisKanji).selectAll("input");
+                          elements.property("value", this.value);
+
+                          if (this.value.toLowerCase() ==
+                              kw[kanji2number[thisKanji]].toLowerCase()) {
+                              // Mark this input box as recognized-keyword
+                              elements.classed('recognized-keyword', true);
+                              target.classed('recognized-keyword', true);
+                          } else {
+                              elements.classed('recognized-keyword', false);
+                              target.classed('recognized-keyword', false);
+                          }
+                      });
+                 element.append('span').text('×').classed('like-link', true).on(
+                     'click', function() {
+                         d3.event.stopPropagation();
+
+                         var elements = d3.selectAll(
+                             ".floating-keyword-input-" + thisKanji);
+                         elements.html("");
+
+                         d3.select("#recognized-container-" + thisKanji)
+                             .remove();
+                         delete app['recognized-kanji'][thisKanji];
+                         updateRecognized();
+                     });
              });
 
     newDivs.append("span")
