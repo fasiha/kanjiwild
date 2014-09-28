@@ -129,9 +129,11 @@ var japaneseInputChanged = function() {
 
     var kanjiCurrentKw = {};
     d3.selectAll(".recognized-container").each(function(d) {
-        kanjiCurrentKw[d] = d3.select("#recognized-container-" + d)
-                                .select("input")
-                                .property("value");
+        var target = d3.select("#recognized-container-" + d).select("input");
+        kanjiCurrentKw[d] = {
+            kw : target.property("value"),
+            recognized : target.classed('recognized-keyword')
+        };
     });
 
     // Find intersection of kanji that the user knows and kanji in the text.
@@ -153,9 +155,13 @@ var japaneseInputChanged = function() {
             
             var existingHtml = "";
             if (kanji in kanjiCurrentKw) {
+                var classHtml = kanjiCurrentKw[kanji].recognized
+                                    ? ' class="recognized-keyword" '
+                                    : "";
                 var existingHtml =
-                    '<form class="pure-form"><input type="text" size="10" oninput="(keywordListener.bind(this, \'' +
-                    kanji + '\'))()" value="' + kanjiCurrentKw[kanji] +
+                    '<form onsubmit="return false;" class="pure-form"><input type="text" size="10" ' +
+                    classHtml + ' oninput="(keywordListener.bind(this, \'' +
+                    kanji + '\'))()" value="' + kanjiCurrentKw[kanji].kw +
                     '"></form><span class="like-link unrecognize-kanji" onclick="(unrecognizeKanjiListener.bind(this, \'' +
                     kanji + '\'))()">×</span>';
             }
@@ -393,6 +399,17 @@ function updateRecognized() {
 
         var target = d3.selectAll('.floating-keyword-input-' + d).html("");
          });
+
+    newDivs.selectAll('form').each(function(d) {
+        this.onsubmit = function() {
+            return false;
+        };
+        d3.selectAll('.floating-keyword-input-' + d).each(function() {
+            this.onsubmit = function() {
+                return false;
+            };
+        });
+    });
 }
 
 function objectToKeysSortedArray(obj) {
