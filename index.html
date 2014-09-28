@@ -138,15 +138,23 @@
       position: absolute;
       top: 50%;
       left: 50%;
-      
       background-color: #eee;
       z-index: 10;
+      /* since #redisplay's font-size is 1.5em, let this be 1/1.5=0.667
+         to bring it back to 1 */
+      font-size: 0.667em;
+
+      min-width:16ex;
     }
     .recognizable-kanji.recognized-kanji:hover .floating-keyword-input {
       display: block;
     }
     .recognizable-kanji {
       position: relative;
+    }
+    .floating-keyword-input form {
+      display: inline-block;
+      margin:0.25em;
     }
   </style>
 </head>
@@ -173,7 +181,7 @@
     <div class="pure-u-1">
       <h2>Enter some Japanese text</h2>
       <form class="pure-form">
-        <textarea type="text" rows="4" class="pure-input-1" id="input-japanese">おはようございます。私は日本語を習っています。日本語大好き！</textarea>
+        <textarea type="text" rows="3" class="pure-input-1" id="input-japanese">おはようございます。私は日本語を習っています。日本語大好き！</textarea>
       </form>
     </div>
 
