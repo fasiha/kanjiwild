@@ -20,6 +20,7 @@ var app = {
     "recognizable-kanji" : [],
     "unknown-kanji" : [],
     "recognized-kanji" : {},
+    "recognized-keyword" : {},
 };
 
 // Kanji regexp
@@ -77,10 +78,13 @@ var keywordListener = function(thisKanji) {
         // Mark this input box as recognized-keyword
         elements.classed('recognized-keyword', true);
         target.classed('recognized-keyword', true);
+        app['recognized-keyword'][thisKanji] = 1;
     } else {
         elements.classed('recognized-keyword', false);
         target.classed('recognized-keyword', false);
+        delete app['recognized-keyword'][thisKanji];
     }
+    updateKeywordInstructions();
 };
 
 var unrecognizeKanjiListener = function(thisKanji) {
@@ -95,6 +99,7 @@ var unrecognizeKanjiListener = function(thisKanji) {
 
     d3.select("#recognized-container-" + thisKanji).remove();
     delete app['recognized-kanji'][thisKanji];
+    delete app['recognized-keyword'][thisKanji];
     updateRecognized();
 };
 
@@ -219,6 +224,19 @@ var japaneseInputChanged = function() {
     buildAnswerKey();
 };
 
+function updateKeywordInstructions() {
+    var correct = _.keys(app['recognized-keyword']).length;
+    var total = _.keys(app['recognized-kanji']).length;
+    d3.select("#recognition-instructions")
+        .text(_.isEmpty(app['recognized-kanji'])
+                  ? ""
+                  : "Enter English keywords here (" +
+                        (correct + " correct, " +
+                         ((total - correct) > 0 ? (total - correct) + " left"
+                                                : "none left!")) +
+                        "):");
+}
+
 // This function gets run whenever app['recognized-kanji'] or
 // app['recognizable-kanji'] changes. Note two things in the previous sentence:
 // "or" and "changes".
@@ -282,9 +300,7 @@ function updateRecognized() {
         (numLeftToRecognize > 0 ? numLeftToRecognize : "none") + " left!");
 
     // Add some instructions:
-    d3.select("#recognition-instructions").text(
-        _.isEmpty(app['recognized-kanji']) ? ""
-                                           : "Enter English keywords here:");
+    updateKeywordInstructions();
 
     // In the redisplay (the thing that you click on to select kanji), remove
     // the ".recognized-kanji" class from all kanji, then add it back to ones
@@ -378,15 +394,20 @@ function updateRecognized() {
 
                  // Mark this input box as recognized-keyword
                  this.classList.add('recognized-keyword');
+
+                 app['recognized-keyword'][d] = 1;
              } else {
                  recognized = false;
                  this.classList.remove('recognized-keyword');
+                 delete app['recognized-keyword'][d];
              }
 
              var target = d3.selectAll('.floating-keyword-input-' + d)
                               .selectAll('input');
              target.property('value', this.value);
              target.classed("recognized-keyword", recognized);
+
+             updateKeywordInstructions();
          });
     // Again, don't use unrecognizeKanjiListener here, which is for redisplay.
     newDivs.append('span')
@@ -395,6 +416,7 @@ function updateRecognized() {
         .on('click', function(d) {
         this.parentNode.remove();
         delete app['recognized-kanji'][d];
+        delete app['recognized-keyword'][d];
         updateRecognized();
 
         var target = d3.selectAll('.floating-keyword-input-' + d).html("");
